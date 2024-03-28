@@ -53,20 +53,19 @@ If the context doesn't contain any relevant information to the question, don't m
 <context>
 {context}
 </context>
-
-#Example
 `
-
+// 
 const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
   ["system", SYSTEM_TEMPLATE],
-  new MessagesPlaceholder("messages"),
+  new MessagesPlaceholder("history"),
   // new HumanMessage("{input}"), // 这样写解析不出来不知道为什么
   // ["human", "{input}"],
 ]);
+// 返回最后一条消息
 const parseRetrieverInput = (params) => {
-  return params.messages[params.messages.length - 1].content;
+  return params.history[params.history.length - 1].content;
 };
-
+// 将document替换context
 const documentChain = await createStuffDocumentsChain({
   llm: chat,
   prompt: questionAnsweringPrompt,
@@ -80,7 +79,7 @@ const documentChain = await createStuffDocumentsChain({
 
 // 将前几轮对话再丢给llm生成一个doc查询
 const queryTransformPrompt = ChatPromptTemplate.fromMessages([
-  new MessagesPlaceholder("messages"),
+  new MessagesPlaceholder("history"),
   [
     "user",
     "根据以上对话，生成一个搜索查询以获取与对话相关的信息.只回答查询内容，不要添加其他内容",
@@ -101,8 +100,9 @@ const queryTransformPrompt = ChatPromptTemplate.fromMessages([
 // });
 
 const queryTransformingRetrieverChain = RunnableBranch.from([
+  // RunnableBranch是分支判断，当params.history.length === 1 为true，执行下面的runnable
   [
-    (params) => params.messages.length === 1,
+    (params) => params.history.length === 1, // 当只有一条消息的时候，直接请求查询，不再问llm生成一个新查询
     RunnableSequence.from([parseRetrieverInput, retriever]),
   ],
   queryTransformPrompt
@@ -111,6 +111,7 @@ const queryTransformingRetrieverChain = RunnableBranch.from([
     .pipe(retriever),
 ]).withConfig({ runName: "chat_retriever_chain" });
 
+// 什么是RunnablePassthrough？
 const conversationalRetrievalChain = RunnablePassthrough.assign({
   context: queryTransformingRetrieverChain,
 }).assign({
@@ -118,12 +119,12 @@ const conversationalRetrievalChain = RunnablePassthrough.assign({
 });
 
 const answer = await conversationalRetrievalChain.invoke({
-  messages: [
-    new HumanMessage("langchain可以做什么?"),
-    new AIMessage(
-      "LangChain可以用于构建端到端的应用程序，如文档问题回答、RAG代理等。它还提供了一系列集成工具和库，以及LangChain表达语言（LCEL）来组合链和代理。此外，LangChain还提供了模板、LangServe和LangSmith等工具，用于部署、调试、测试和监控基于任何LLM框架构建的链。"
-    ),
-    new HumanMessage("怎么构建"),
+  history: [
+    // new HumanMessage("langchain可以做什么?"),
+    // new AIMessage(
+    //   "LangChain可以用于构建端到端的应用程序，如文档问题回答、RAG代理等。它还提供了一系列集成工具和库，以及LangChain表达语言（LCEL）来组合链和代理。此外，LangChain还提供了模板、LangServe和LangSmith等工具，用于部署、调试、测试和监控基于任何LLM框架构建的链。"
+    // ),
+    new HumanMessage("你好"),
   ],
 });
 
