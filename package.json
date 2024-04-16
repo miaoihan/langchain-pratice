@@ -1,4 +1,7 @@
 {
+	"scripts": {
+		"start": "node -r dotenv/config"
+	},
 	"dependencies": {
 		"@langchain/community": "^0.0.39",
 		"@langchain/core": "^0.1.48",
