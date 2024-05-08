@@ -30,7 +30,7 @@ const embeddings = new OpenAIEmbeddings({
 // console.log('====emb====\n', emb);
 
 // 创建一个新的CheerioWebBaseLoader实例，用于从指定的URL加载文档
-const loader = new CheerioWebBaseLoader("https://js.langchain.com/docs/get_started/introduction");
+const loader = new CheerioWebBaseLoader("https://www.miaoyanai.com");
 
 // 加载文档
 const rawDocs = await loader.load();

@@ -22,12 +22,12 @@ const embeddings = new OpenAIEmbeddings();
 
 // 创建一个新的CheerioWebBaseLoader实例，用于从指定的URL加载文档
 const loader = new CheerioWebBaseLoader(
-  "https://js.langchain.com/docs/get_started/introduction"
+  "https://www.miaoyanai.com"
 );
 
 // 加载文档
 const rawDocs = await loader.load();
-rawDocs[0].metadata = { ...rawDocs[0].metadata, "dialogId": 5 }
+rawDocs[0].metadata = { ...rawDocs[0].metadata, dialogId: 5 }
 // console.log('====rawDocs====\n', rawDocs);
 
 /**  将文档分割成小块，以便LLM的上下文窗口可以处理，并将其存储在向量数据库中 **/
@@ -47,7 +47,7 @@ console.time('vectorstore')
 // 存储到向量数据库
 // const vectorstore = await Chroma.fromDocuments(allSplits, embeddings)
 const vectorStore = await Chroma.fromDocuments(allSplits, embeddings, {
-  collectionName: "collection-5",
+  collectionName: "collection-10",
   url: "http://107.150.102.219:8000", // Optional, will default to this value
   collectionMetadata: {
     "hnsw:space": "cosine",
@@ -62,8 +62,10 @@ console.timeEnd('vectorstore')
 
 // it can work
 // const res = await vectorStore.similaritySearch('总结文档', 4, (doc) => doc.metadata.dialogId === 2)
-const searchResults = await vectorStore.similaritySearch('总结文档', 4, { dialogId: 2 })
-console.log('====res====\n', searchResults);
+console.time('similaritySearch')
+const searchResults = await vectorStore.similaritySearch('', 4, { dialogId: 5 })
+console.timeEnd('similaritySearch')
+console.log('====searchResults====\n', searchResults);
 // const result = await vectorStore.collection.query({
 //   // queryEmbeddings: embeddings,
 //   queryTexts: ['langchain有什么特点'],
@@ -76,7 +78,7 @@ const retriever = vectorStore.asRetriever();
 
 console.time('retriever.invoke')
 // 使用检索器查询文档
-const docs = await retriever.invoke('langchain有什么特点')
+const docs = await retriever.invoke('妙言AI', { dialogId: 5 })
 console.timeEnd('retriever.invoke')
 // const doc2 = await vectore.invoke('what is LangChain Libraries?')
 // const doc3 = await vectore.invoke('')
@@ -107,7 +109,7 @@ const documentChain = await createStuffDocumentsChain({
 });
 
 const answer = await documentChain.invoke({
-  input: 'langchain有什么特点',
+  input: '妙言Ai是什么？',
   context: docs
 })
 
