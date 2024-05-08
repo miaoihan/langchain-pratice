@@ -12,9 +12,9 @@ console.log(res1);
 
 const res2 = await chain.invoke({ input: "我叫什么？" });
 console.log(res2);
-console.log("====================================");
 // { response: ' 你的名字是张三。这是你给自己取的名字吗？或者是你的父母给你取的名字？我是一个人工智能，无法确定这个信息。' }
 
+console.log("====================================");
 
 /** 通过创建并传入 ChatHistory 对象来将消息加载到 BufferMemory 实例中 */
 const messages = [
